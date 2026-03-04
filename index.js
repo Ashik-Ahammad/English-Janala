@@ -4,7 +4,52 @@ const loadLessons = () => {
     .then(json => displayLessons(json.data))
 }
 
+const manageSpinner = (status) => {
+    if(status == true){
+        document.getElementById("spinner").classList.remove("hidden");
+        document.getElementById("word-container").classList.add("hidden");
+    }
+    else{
+        document.getElementById("spinner").classList.add("hidden");
+        document.getElementById("word-container").classList.remove("hidden");
+    }
+}
+
+const loadWordDetail = async(id) => {
+    const url = `https://openapi.programming-hero.com/api/word/${id}`
+    const res = await fetch(url);
+    const details = await res.json();
+    displayWordDetails(details.data)
+}
+
+const displayWordDetails = (word) => {
+    const detailsBox = document.getElementById("detailsContainer");
+    detailsBox.innerHTML = `
+            <div class="my-2">
+              <h2 class="text-2xl font-bold">${word.word} (<i class="fa-solid fa-microphone-lines" style="color: rgb(55, 61, 53);"></i>: ${word.pronunciation})</h2>
+            </div>
+            <div class="my-2">
+              <h2 class="text-xl font-bold">Meaning</h2>
+              <p>${word.meaning}</p>
+            </div>
+            <div class="my-2">
+              <h2 class="text-xl font-bold">Example</h2>
+              <p>${word.sentence}</p>
+            </div>
+            <div class="my-2">
+              <h2 class="text-xl font-bold">সমার্থক শব্দ গুলো</h2>
+              <span class="btn rounded-lg">${word.synonyms[0]}</span>
+              <span class="btn rounded-lg">${word.synonyms[1]}</span>
+              <span class="btn rounded-lg">${word.synonyms[2]}</span>
+            </div>
+          
+    `;
+    document.getElementById("word_modal").showModal();
+    
+}
+
 const loadLevelWord = (id) => {
+    manageSpinner(true)
     const url = `https://openapi.programming-hero.com/api/level/${id}`
     fetch(url)
     .then(res => res.json())
@@ -36,7 +81,6 @@ const displayLevelWord = (words) => {
     }
 
     words.forEach((word) =>{
-        console.log(word);
         const card = document.createElement("div");
         card.innerHTML = `
             <div class="card shadow-lg bg-white text-black w-auto ">
@@ -45,7 +89,7 @@ const displayLevelWord = (words) => {
                     <p><span class="text-red-400">Meaning</span> / <span class="text-green-900">Pronounciation</span></p>
                     <p class="text-xl font-semibold"><span class="text-sky-400">${word.meaning === null ? "অর্থ পাওয়া যায়নি" : word.meaning}</span> / <span class="text-blue-900">${word.pronunciation === null ? "উচ্চারণ পাওয়া যায়নি" : word.pronunciation}</span></p>
                     <div class="items-center flex justify-between mt-5">
-                        <button class="btn btn-circle"><i class="fa-solid fa-circle-info" style="color: rgb(119, 114, 129);"></i></button>
+                        <button onclick="loadWordDetail(${word.id})" class="btn btn-circle"><i class="fa-solid fa-circle-info" style="color: rgb(119, 114, 129);"></i></button>
                         <button class="btn btn-circle"><i class="fa-solid fa-volume-high" style="color: rgb(119, 114, 129);"></i></button>
                     </div>
                 </div>
@@ -53,6 +97,7 @@ const displayLevelWord = (words) => {
         `
         wordContainer.appendChild(card);
     });
+    manageSpinner(false)
 }
 
 const displayLessons = (lessons) => {
